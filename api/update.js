@@ -4,40 +4,35 @@ export default async function handler(req, res) {
   }
 
   const { key, value } = req.body;
-  const token = process.env.VERCEL_API_TOKEN;
-  const configId = process.env.EDGE_CONFIG_ID;
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-  if (!token || !configId) {
+  if (!supabaseUrl || !supabaseKey) {
     return res.status(500).json({ error: 'שרת Vercel אינו מוגדר כראוי (משתני סביבה חסרים).' });
   }
 
   try {
-    // קריאה מאובטחת ל-Vercel REST API לעדכון המפתח
-    const response = await fetch(
-      `https://api.vercel.com/v1/edge-config/${configId}/items`,
-      {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          items: [
-            {
-              operation: 'upsert',
-              key: key.toLowerCase().trim(),
-              value: value.trim(),
-            },
-          ],
-        }),
-      }
-    );
+    // ביצוע פעולת Upsert (עדכון אם קיים, יצירה אם לא קיים) ב-Supabase
+    const response = await fetch(`${supabaseUrl}/rest/v1/links`, {
+      method: 'POST',
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates', // גורם לזה להתנהג כ-Upsert
+      },
+      body: JSON.stringify({
+        id: key.toLowerCase().trim(),
+        destination_url: value.trim(),
+        updated_at: new Date().toISOString(),
+      }),
+    });
 
-    if (response.ok) {
+    if (response.status === 201 || response.status === 200 || response.ok) {
       return res.status(200).json({ success: true });
     } else {
-      const errData = await response.json();
-      return res.status(response.status).json({ error: 'שגיאה בעדכון מול שרתי Vercel' });
+      const errText = await response.text();
+      return res.status(400).json({ error: 'שגיאה בעדכון מול שרת Supabase' });
     }
   } catch (error) {
     return res.status(500).json({ error: 'Internal Server Error' });
