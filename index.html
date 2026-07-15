@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ניהול קישורי לומדות</title>
+  <title>ניהול קישורי לומדות - Supabase</title>
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
@@ -103,7 +103,7 @@
 
   <div class="card">
     <h1>ניהול קישורי לומדות</h1>
-    <p class="subtitle">עדכון מהיר של כתובות היעד בלחיצת כפתור אחת</p>
+    <p class="subtitle">עדכון מהיר של כתובות היעד בלחיצת כפתור אחת (Supabase)</p>
 
     <form id="updateForm">
       <div class="form-group">
@@ -146,12 +146,12 @@
 
         if (response.ok && result.success) {
           messageDiv.className = 'success';
-          messageDiv.innerText = `הקישור של "${key}" עודכן בהצלחה!`;
+          messageDiv.innerText = `הקישור של "${key}" עודכן בהצלחה ב-Supabase!`;
           document.getElementById('key').value = '';
           document.getElementById('value').value = '';
         } else {
           messageDiv.className = 'error';
-          messageDiv.innerText = result.error || 'שגיאה בעדכון הקישור בשרת.';
+          messageDiv.innerText = result.error || 'שגיאה בעדכון הקישור.';
         }
       } catch (err) {
         messageDiv.className = 'error';
